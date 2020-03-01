@@ -1,7 +1,6 @@
 package com.demo.verticle.standard;
 
 import com.demo.Global;
-import com.demo.controller.BlockingController;
 import com.demo.controller.CandidateController;
 import com.demo.controller.HomeController;
 import com.demo.controller.VoteController;
@@ -9,10 +8,12 @@ import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -72,11 +73,8 @@ public class MainVerticle extends AbstractVerticle {
             router.route().handler(BodyHandler.create());
 
             // Home route
-            router.route(HttpMethod.GET, "/").handler(HomeController::getHomePage);
-
-            // Blocking route
-            router.route(HttpMethod.GET, "/bocking").handler(BlockingController::createBlockingScenarios);
-            router.route(HttpMethod.GET, "/non_blocking").handler(BlockingController::createNonBlockingScenarios);
+            HomeController homeController = new HomeController();
+            router.route(HttpMethod.GET, "/").handler(new HomeController());
 
             // Candidate route
             router.route(HttpMethod.GET, "/candidates/:candidate_id").handler(CandidateController::getCandidate);
@@ -88,9 +86,16 @@ public class MainVerticle extends AbstractVerticle {
             router.route(HttpMethod.POST, "/votes").handler(VoteController::createVote);
 
             // Admin route
-            server = vertx.createHttpServer().requestHandler(router).listen(port);
+            HttpServerOptions httpServerOptions = new HttpServerOptions();
+
+            server = vertx.createHttpServer(httpServerOptions).requestHandler(router).listen(port);
             logger.info("{} port: {} started with current deployment id: {}",
                     this.getClass().getName(), port, Vertx.currentContext().deploymentID());
         });
+    }
+
+    @Override
+    public void stop(final Future<Void> stopFuture) {
+        logger.info("Undeployd verticle {} with status {}", MainVerticle.class.getName(), stopFuture.isComplete());
     }
 }

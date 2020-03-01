@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by Tu Pham Phuong - phamptu@gmail.com on 2/21/20.
  */
-public class Runner {
-    private static Logger logger = LoggerFactory.getLogger(Runner.class);
+public class AppRunner {
+    private static Logger logger = LoggerFactory.getLogger(AppRunner.class);
 
     public static void main(String[] args) {
         logger.info("\n\n\n ------ Runner starting up ------");
@@ -30,7 +30,7 @@ public class Runner {
 
         retriever.getConfig(json -> {
             // Scale MainVerticle to 100 instances
-            vertx.deployVerticle(MainVerticle.class.getName(), new DeploymentOptions().setInstances(100), res -> {
+            vertx.deployVerticle(MainVerticle.class.getName(), new DeploymentOptions().setInstances(10), res -> {
                 if (res.succeeded()) logger.info("MainVerticle deployment id is: " + res.result());
                 else logger.info("MainVerticle deployment failed!");
             });
